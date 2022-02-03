@@ -1,0 +1,72 @@
+version: "3.7"
+services:
+  nginx:
+    image: nginx:1.16-alpine
+    container_name: nginx_market
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./api:/var/www/api
+      - ./client:/var/www/client
+      - ./docker/nginx:/etc/nginx/conf.d/
+      - ./docker/certs:/etc/nginx/certs
+    networks:
+      - market_network
+
+  db:
+    image: mysql:5.7.22
+    container_name: db_market
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: market_app_db
+      MYSQL_ROOT_PASSWORD: market_app_password
+      MYSQL_PASSWORD: market_app_password
+      MYSQL_USER: market_app_user
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./db_data:/var/lib/mysql
+      - ./docker/mysql:/etc/mysql/conf.d
+    networks:
+      - market_network
+
+  api:
+    build:
+      args:
+        user: vlad
+        uid: 1000
+      context: ./docker
+      dockerfile: Dockerfile
+    tty: true
+    container_name: api_market
+    restart: unless-stopped
+    working_dir: /var/www/api
+    volumes:
+      - ./api:/var/www/api
+    networks:
+      - market_network
+
+  client:
+    image: node:lts-alpine
+    container_name: client_market
+    tty: true
+    volumes:
+      - ./client:/client
+    working_dir: /client
+    environment:
+      NODE_ENV: development
+    command: npm run serve
+    networks:
+      - market_network
+
+volumes:
+  db_data:
+
+networks:
+  market_network:
+    driver: bridge
