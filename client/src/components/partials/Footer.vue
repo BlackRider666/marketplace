@@ -1,6 +1,8 @@
 <template>
   <v-footer
       class="font-weight-medium"
+      dark
+      color="primary"
   >
     <v-col
         class="text-left"

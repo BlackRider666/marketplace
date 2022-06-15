@@ -20,7 +20,6 @@ export default {
   },
   created () {
     this.$store.dispatch('l10s/getActiveLocales')
-    this.$store.dispatch('account/downloadAccount')
     this.updateTranslations()
   },
   computed: {
@@ -50,4 +49,14 @@ export default {
 }
 </script>
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Montserrat&display=swap');
+
+$body-font-family: 'Montserrat';
+$title-font: 'Montserrat';
+.v-application {
+  font-family: $body-font-family, sans-serif !important;
+  .title {
+    font-family: $title-font, sans-serif !important;
+  }
+}
 </style>

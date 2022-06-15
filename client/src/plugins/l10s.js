@@ -10,7 +10,6 @@ const L10s = {
       if (translations[key] !== undefined && translations[key].length > 0) {
         return translations[key]
       }
-      console.log({ key, value })
       this.untranslatedKeys.push({ key, value })
       this.onUntranslatedKeyFoundCallback(key, value)
       return value

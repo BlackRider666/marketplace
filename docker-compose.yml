@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - 3306:3306
+      - "3306:3306"
     environment:
       MYSQL_DATABASE: market_app_db
       MYSQL_ROOT_PASSWORD: market_app_password
@@ -41,8 +41,13 @@ services:
         user: vlad
         uid: 1000
       context: ./docker
-      dockerfile: Dockerfile
+      dockerfile: settings/main.Dockerfile
     tty: true
+    links:
+      - auth
+      - product
+      - delivery
+      - checkout
     container_name: api_market
     restart: unless-stopped
     working_dir: /var/www/api
@@ -50,6 +55,7 @@ services:
       - ./api:/var/www/api
     networks:
       - market_network
+      - api_market_network
 
   client:
     image: node:lts-alpine
@@ -63,10 +69,71 @@ services:
     command: npm run serve
     networks:
       - market_network
+  auth:
+    build:
+      args:
+        user: vlad
+        uid: 1000
+      context: ./docker/settings/auth
+      dockerfile: auth.Dockerfile
+    tty: true
+    container_name: auth_market
+    restart: unless-stopped
+    volumes:
+      - ./modules/auth:/var/www/html
+    networks:
+      - api_market_network
+#  product:
+#    build:
+#      args:
+#        user: vlad
+#        uid: 1000
+#      context: ./docker
+#      dockerfile: settings/product.Dockerfile
+#    tty: true
+#    container_name: product_market
+#    restart: unless-stopped
+#    working_dir: /var/www/modules/product
+#    volumes:
+#      - ./modules/product:/var/www/modules/product
+#    networks:
+#      - api_market_network
+#  checkout:
+#    build:
+#      args:
+#        user: vlad
+#        uid: 1000
+#      context: ./docker
+#      dockerfile: settings/checkout.Dockerfile
+#    tty: true
+#    container_name: checkout_market
+#    restart: unless-stopped
+#    working_dir: /var/www/modules/checkout
+#    volumes:
+#      - ./modules/checkout:/var/www/modules/checkout
+#    networks:
+#      - api_market_network
+#  delivery:
+#    build:
+#      args:
+#        user: vlad
+#        uid: 1000
+#      context: ./docker
+#      dockerfile: settings/delivery.Dockerfile
+#    tty: true
+#    container_name: delivery_market
+#    restart: unless-stopped
+#    working_dir: /var/www/modules/delivery
+#    volumes:
+#      - ./modules/delivery:/var/www/modules/delivery
+#    networks:
+#      - api_market_network
 
 volumes:
   db_data:
 
 networks:
   market_network:
+    driver: bridge
+  api_market_network:
     driver: bridge
